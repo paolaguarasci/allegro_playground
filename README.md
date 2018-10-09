@@ -13,6 +13,7 @@ int main(int argc, char **argv) {}
 ---
 With cmake installed:
 ```bash
+$ cd build
 $ cmake .
 $ make
 $ ./AllegroPrimer
