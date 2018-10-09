@@ -11,3 +11,9 @@ The main() needs as like this:
 int main(int argc, char **argv) {}
 ```
 ---
+With cmake installed:
+```bash
+$ cmake .
+$ make
+$ ./AllegroPrimer
+```
