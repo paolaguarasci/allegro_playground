@@ -1,6 +1,6 @@
 # Allegro Primer
 ---
-On MAC compile with:
+On MAC (and Debian-like distro) compile with:
 
 ```bash
 g++ main.cpp -L/usr/local/lib -lallegro -lallegro_main
