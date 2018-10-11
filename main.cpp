@@ -7,7 +7,7 @@
 int main(int argc, char **argv)
 {
   ALLEGRO_DISPLAY *display = NULL;
-  if (!al_init())
+   if (!al_init())
   {
     fprintf(stderr, "failed to initialize allegro!\n");
     return -1;

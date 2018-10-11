@@ -16,5 +16,5 @@ With cmake installed:
 $ cd build
 $ cmake .
 $ make
-$ ./AllegroPrimer
+$ ./allegroPrimer
 ```

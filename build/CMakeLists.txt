@@ -2,11 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 project(allegroPrimer)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(SOURCE_FILES ../main.cpp)
-add_executable(AllegroPrimer ${SOURCE_FILES})
-
-
+add_executable(allegroPrimer ${SOURCE_FILES})
 
 IF(UNIX)
   IF(APPLE)
@@ -17,15 +14,18 @@ IF(UNIX)
     message("LIBRARIES = ${LIBRARIES}")
   ELSE(APPLE)
     SET(GUI "X11")
+    INCLUDE_DIRECTORIES(  /usr/include/allegro5 )
+    LINK_DIRECTORIES(  /usr/lib/x86_64-linux-gnu/ )
+    file(GLOB LIBRARIES "/usr/lib/x86_64-linux-gnu/liballegro*.*")
+    message("LIBRARIES = ${LIBRARIES}")
   ENDIF(APPLE)
 ELSE(UNIX)
   IF(WIN32)
     SET(GUI "Win32")
-
   ELSE(WIN32)
     SET(GUI "Unknown")
   ENDIF(WIN32)
 ENDIF(UNIX)
 MESSAGE("Compiled for... ${GUI}")
 
-TARGET_LINK_LIBRARIES(AllegroPrimer  ${LIBRARIES})
+TARGET_LINK_LIBRARIES(allegroPrimer  ${LIBRARIES})
