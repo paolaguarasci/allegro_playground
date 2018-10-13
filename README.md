@@ -46,11 +46,24 @@ $ ./allegroPrimer
     - disegno l'img nella nuova posizione
     - flippo il display
 ---
-Una bitmap che segue il puntatore del mouse
-ho gia: una coda di eventi ed un timer
-installo l'addon mouse
-registro il mouse come fonte per la coda di eventi
-Nel loop
-    se si verifica un evento di tipo ALLEGRO_EVENT_MOUSE_AXES
-        aggiorno le coordinate x e y della bitmap
-    disegno ogni x secondi il mio frame (gli FPS)
+- Una bitmap che segue il puntatore del mouse
+- ho gia: una coda di eventi ed un timer
+- installo l'addon mouse
+- registro il mouse come fonte per la coda di eventi
+- Nel loop
+    - e si verifica un evento di tipo ALLEGRO_EVENT_MOUSE_AXES
+        - aggiorno le coordinate x e y della bitmap
+    - disegno ogni x secondi il mio frame (gli FPS)
+---
+- Creo un un oggetto ALLEGRO_KEYBOARD_STATE
+- Popolo l'oggetto con al_get_keyboard_state(&keyState);
+- Controllo keyState con un if il primo tasto della combinazione
+    - Controllo keyState con un if innsetato il secondo tasto della combinazione
+---
+- includo ed inizializzo l'addon primitives
+- nel controllo dell'evento timer (FPS)
+    - disegno la mia riga o quello che voglio con al_draw_*qualcosa*
+
+*niente da distruggere....*
+---
+-

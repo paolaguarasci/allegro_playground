@@ -1,6 +1,7 @@
+#include <iostream>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
-#include <iostream>
+#include <allegro5/allegro_primitives.h>
 
 int main(int argc, char **argv)
 {
@@ -8,6 +9,10 @@ int main(int argc, char **argv)
   al_install_keyboard();
   al_install_mouse();
   al_init_image_addon();
+  al_init_primitives_addon();
+
+  float points[8] = {0.00f, 0.00f, 100.00f, 100.00f, 200.00f, 100.00f, 640.00f, 150.00f};
+  float polygon[8] = {640.00f, 100.00f, 640.00f, 300.00f, 300.00f, 350.00f, 200.00f, 200.00f};
 
   ALLEGRO_DISPLAY *display;
   ALLEGRO_EVENT_QUEUE *queue;
@@ -65,7 +70,7 @@ int main(int argc, char **argv)
     //   al_set_mouse_xy(display, 0, 0);
     // }
 
-    //Keyboard and multiple ket press at sime time
+    //Keyboard and multiple ket press at same time
     ALLEGRO_KEYBOARD_STATE keyState;
     al_get_keyboard_state(&keyState);
     if (al_key_down(&keyState, ALLEGRO_KEY_RIGHT))
@@ -73,31 +78,21 @@ int main(int argc, char **argv)
       if (al_key_down(&keyState, ALLEGRO_KEY_SPACE))
       {
         x += 10;
-        // std::cout << "Win" << std::endl;
+        // std::cout  << "Win" << std::endl;
       }
       else
       {
         x += 1;
       }
     }
-    // if (al_key_down(&keyState, ALLEGRO_KEY_RIGHT))
-    // {
-    //   std::cout << "Press --> " << std::endl;
-    // }
-    // if (al_key_down(&keyState, ALLEGRO_KEY_UP))
-    // {
-    //   std::cout << "Press ^ " << std::endl;
-    // }
-    // if (al_key_down(&keyState, ALLEGRO_KEY_DOWN))
-    // {
-    //   std::cout << "Press down " << std::endl;
-    // }
 
     // Flippo il display ogni 1/60 sec (ottengo un FPS a 60)
     if (event.type == ALLEGRO_EVENT_TIMER)
     {
-      al_clear_to_color(al_map_rgba(1, 1, 1, 1));
-      al_draw_bitmap(bitmap, x, y, 0);
+      // disegno una linea rossa dall'angolo superiore sx all'angolo inferiore destro
+      al_draw_line(0, 0, al_get_display_width(display), al_get_display_height(display), al_map_rgb(255, 0, 0), 5);
+      al_draw_rectangle(100, 100, 300, 300, al_map_rgb(0, 255, 0), 5);
+      al_draw_spline(points, al_map_rgb(128, 255, 130), 10);
       al_flip_display();
     }
 
