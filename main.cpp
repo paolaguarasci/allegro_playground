@@ -22,8 +22,8 @@ int main(int argc, char **argv)
   ALLEGRO_DISPLAY *display = al_create_display(SCREEN_W, SCREEN_H);
   // ALLEGRO_BITMAP *ico = al_load_bitmap("../assets/img/image64x64.png");
   ALLEGRO_BITMAP *pg = al_load_bitmap("../assets/img/image64x64.png");
-  ALLEGRO_BITMAP **frame = new ALLEGRO_BITMAP *[10];
-  for (int i = 0; i < 10; i++)
+  ALLEGRO_BITMAP **frame = new ALLEGRO_BITMAP *[18];
+  for (int i = 0; i < 17; i++)
   {
     string path;
     if (i < 8)
@@ -51,12 +51,14 @@ int main(int argc, char **argv)
   int start_x = 96;
   int start_y = 0;
   int delta_x = 16;
+  int direction = 0;
   al_start_timer(timer);
   bool active = false;
   bool flip = false;
   int pos = 0;
   while (running)
   {
+    y = SCREEN_H / 2;
     active = false;
     ALLEGRO_EVENT event;
     al_wait_for_event(queue, &event);
@@ -74,6 +76,7 @@ int main(int argc, char **argv)
       pos = (pos == 1 ? 2 : 1);
       active = true;
       flip = false;
+      direction = 1;
     }
     if (al_key_down(&keyState, ALLEGRO_KEY_LEFT))
     {
@@ -81,10 +84,23 @@ int main(int argc, char **argv)
       pos = (pos == 1 ? 2 : 1);
       active = true;
       flip = true;
+      direction = -1;
     }
     if (al_key_down(&keyState, ALLEGRO_KEY_DOWN))
     {
       pos = 5;
+      active = true;
+    }
+    if (al_key_down(&keyState, ALLEGRO_KEY_SPACE))
+    {
+      pos = 4;
+      active = true;
+      // x += 0.1;
+      y -= 20;
+    }
+    if (al_key_down(&keyState, ALLEGRO_KEY_B))
+    {
+      pos = 16;
       active = true;
     }
     if (!active)
@@ -101,7 +117,7 @@ int main(int argc, char **argv)
     }
   }
 
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 17; i++)
   {
     al_destroy_bitmap(frame[i]);
   }
