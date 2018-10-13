@@ -58,6 +58,11 @@ int main(int argc, char **argv)
       x = event.mouse.x;
       y = event.mouse.y;
     }
+    if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+    {
+      x = y = 0;
+      al_set_mouse_xy(display, 0, 0);
+    }
 
     // Flippo il display ogni 1/60 sec (ottengo un FPS a 60)
     if (event.type == ALLEGRO_EVENT_TIMER)
