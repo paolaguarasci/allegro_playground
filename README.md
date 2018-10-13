@@ -35,14 +35,22 @@ $ ./allegroPrimer
 - Esco
 
 ----
-inizializzo il modulo delle immagini
-creo l'oggetto ALLEGRO_BITMAP (e lo assegno ad un puntatore) e gli carico dentro l'img (al_load_bitmap([path]))
-Disegno l'img
-
-Se voglio far vedere che l'img si muove
-  creo e faccio partire un timer che emette un evento ogni x secondi (glielo indico io) (I miei FPS)
-  Ogni volta che si verifica l'evento timer
-    cancello tutto
-    disegno l'img nella nuova posizione
-    flippo il display
-
+- inizializzo il modulo delle immagini
+- creo l'oggetto ALLEGRO_BITMAP (e lo assegno ad un puntatore) e gli carico dentro l'img (al_load_bitmap([path]))
+- Disegno l'img
+---
+- Se voglio far vedere che l'img si muove
+  - creo e faccio partire un timer che emette un evento ogni x secondi (glielo indico io) (I miei FPS)
+  - Ogni volta che si verifica l'evento timer
+    - cancello tutto
+    - disegno l'img nella nuova posizione
+    - flippo il display
+---
+Una bitmap che segue il puntatore del mouse
+ho gia: una coda di eventi ed un timer
+installo l'addon mouse
+registro il mouse come fonte per la coda di eventi
+Nel loop
+    se si verifica un evento di tipo ALLEGRO_EVENT_MOUSE_AXES
+        aggiorno le coordinate x e y della bitmap
+    disegno ogni x secondi il mio frame (gli FPS)
