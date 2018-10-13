@@ -2,6 +2,8 @@
 #include <string>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include "variable.hpp"
 using namespace std;
 
@@ -11,6 +13,8 @@ int main(int argc, char **argv)
   al_install_keyboard();
   al_install_mouse();
   al_init_image_addon();
+  al_init_font_addon();
+  al_init_ttf_addon();
 
   const ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
   const ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
@@ -36,7 +40,7 @@ int main(int argc, char **argv)
   // al_set_display_icon(display, ico);
   ALLEGRO_TIMER *timer = al_create_timer(1 / FPS);
   ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
-
+  ALLEGRO_FONT *font = al_load_ttf_font("../assets/fnt/font.ttf", 120, 0);
   al_register_event_source(queue, al_get_keyboard_event_source());
   al_register_event_source(queue, al_get_mouse_event_source());
   al_register_event_source(queue, al_get_display_event_source(display));
@@ -106,6 +110,8 @@ int main(int argc, char **argv)
       pos = 1;
     if (event.type == ALLEGRO_EVENT_TIMER)
     {
+      al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
+      al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
       // for (int i = 0; i < 10; i++)
       //   al_draw_bitmap(frame[i], x += 32, y += 32, 0);
       // al_draw_bitmap(pg, x, y, 0);
@@ -126,8 +132,12 @@ int main(int argc, char **argv)
   al_destroy_event_queue(queue);
   // al_destroy_bitmap(spritesheet);
   // al_destroy_bitmap(ico);
+  al_destroy_font(font);
   al_destroy_display(display);
   al_uninstall_keyboard();
+  // al_shutdown_font_addon();
+  // al_shutdown_image_addon();
+  // al_shutdown_ttf_addon();
   al_uninstall_mouse();
   return 0;
 }
