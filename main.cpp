@@ -53,6 +53,7 @@ int main(int argc, char **argv)
   int delta_x = 16;
   al_start_timer(timer);
   bool active = false;
+  bool flip = false;
   int pos = 0;
   active = false;
   while (running)
@@ -72,10 +73,14 @@ int main(int argc, char **argv)
       x = (x + PASSO > SCREEN_W ? 0 : x + PASSO);
       pos = (pos == 1 ? 2 : 1);
       active = true;
+      flip = false;
     }
     if (al_key_down(&keyState, ALLEGRO_KEY_LEFT))
     {
       x = (x - PASSO + al_get_bitmap_width(pg) > 0 ? x - PASSO : SCREEN_W);
+      pos = (pos == 1 ? 2 : 1);
+      active = true;
+      flip = true;
     }
     if (!active)
       pos = 1;
@@ -84,7 +89,7 @@ int main(int argc, char **argv)
       // for (int i = 0; i < 10; i++)
       //   al_draw_bitmap(frame[i], x += 32, y += 32, 0);
       // al_draw_bitmap(pg, x, y, 0);
-      al_draw_bitmap(frame[pos], x, y, 0);
+      al_draw_bitmap(frame[pos], x, y, flip);
       // al_draw_bitmap_region(spritesheet, start_x + delta_x * pos, start_y, 16, 32, x, y, NULL);
       al_flip_display();
       al_clear_to_color(blue);
