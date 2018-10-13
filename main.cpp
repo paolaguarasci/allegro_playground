@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     if (event.type == ALLEGRO_EVENT_TIMER)
     {
       al_clear_to_color(al_map_rgba(1, 1, 1, 1));
-      al_draw_bitmap(bitmap, x += 10, 0, 0);
+      al_draw_bitmap(bitmap, x, y, 0);
       al_flip_display();
     }
 
