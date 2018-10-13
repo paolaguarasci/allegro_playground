@@ -55,9 +55,9 @@ int main(int argc, char **argv)
   bool active = false;
   bool flip = false;
   int pos = 0;
-  active = false;
   while (running)
   {
+    active = false;
     ALLEGRO_EVENT event;
     al_wait_for_event(queue, &event);
     // Keyboard and multiple ket press at sime time
@@ -81,6 +81,11 @@ int main(int argc, char **argv)
       pos = (pos == 1 ? 2 : 1);
       active = true;
       flip = true;
+    }
+    if (al_key_down(&keyState, ALLEGRO_KEY_DOWN))
+    {
+      pos = 5;
+      active = true;
     }
     if (!active)
       pos = 1;
