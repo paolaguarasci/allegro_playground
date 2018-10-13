@@ -1,5 +1,6 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
+#include <iostream>
 
 int main(int argc, char **argv)
 {
@@ -53,16 +54,44 @@ int main(int argc, char **argv)
     }
 
     // mouse
-    if (event.type == ALLEGRO_EVENT_MOUSE_AXES)
+    // if (event.type == ALLEGRO_EVENT_MOUSE_AXES)
+    // {
+    //   x = event.mouse.x;
+    //   y = event.mouse.y;
+    // }
+    // if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+    // {
+    //   x = y = 0;
+    //   al_set_mouse_xy(display, 0, 0);
+    // }
+
+    //Keyboard and multiple ket press at sime time
+    ALLEGRO_KEYBOARD_STATE keyState;
+    al_get_keyboard_state(&keyState);
+    if (al_key_down(&keyState, ALLEGRO_KEY_RIGHT))
     {
-      x = event.mouse.x;
-      y = event.mouse.y;
+      if (al_key_down(&keyState, ALLEGRO_KEY_SPACE))
+      {
+        x += 10;
+        // std::cout << "Win" << std::endl;
+      }
+      else
+      {
+        x += 1;
+      }
     }
-    if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
-    {
-      x = y = 0;
-      al_set_mouse_xy(display, 0, 0);
-    }
+    // if (al_key_down(&keyState, ALLEGRO_KEY_RIGHT))
+    // {
+    //   std::cout << "Press --> " << std::endl;
+    // }
+    // if (al_key_down(&keyState, ALLEGRO_KEY_UP))
+    // {
+    //   std::cout << "Press ^ " << std::endl;
+    // }
+    // if (al_key_down(&keyState, ALLEGRO_KEY_DOWN))
+    // {
+    //   std::cout << "Press down " << std::endl;
+    // }
 
     // Flippo il display ogni 1/60 sec (ottengo un FPS a 60)
     if (event.type == ALLEGRO_EVENT_TIMER)
