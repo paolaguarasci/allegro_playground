@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   bool draw = false;
   bool running = true;
   float x = SCREEN_W / 2;
-  float y = SCREEN_H / 2;
+  float y = SCREEN_H - 32;
   float asse = 0;
   int start_x = 96;
   int start_y = 0;
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   int pos = 0;
   while (running)
   {
-    y = SCREEN_H / 2;
+    y = SCREEN_H - 32;
     active = false;
     ALLEGRO_EVENT event;
     al_wait_for_event(queue, &event);
@@ -95,7 +95,6 @@ int main(int argc, char **argv)
     {
       pos = 4;
       active = true;
-      // x += 0.1;
       y -= 20;
     }
     if (al_key_down(&keyState, ALLEGRO_KEY_B))
