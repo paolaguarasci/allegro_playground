@@ -1,13 +1,48 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_primitives.h>
 #include "variable.hpp"
 using namespace std;
+int loadCounterX = 0, loadCounterY = 0, mapSizeX, mapSizeY;
+int map[100][100];
+void loadMap(const char *filename, int map[100][100])
+{
+  ifstream openfile(filename);
+  if (openfile.is_open())
+  {
+    openfile >> mapSizeX >> mapSizeY;
+    cout << mapSizeX << ", " << mapSizeY << endl;
+    while (!openfile.eof())
+    {
+      // leggo dal file la posizione lcx e lcy
+      openfile >> map[loadCounterX][loadCounterY];
+      cout << map[loadCounterX][loadCounterY] << " ";
+      loadCounterX++;
+      // incremento solo la x,
+      // quando arriva al bordo la porto a 0
+      // e scendo di una riga
+      if (loadCounterX >= mapSizeX)
+      {
+        loadCounterX = 0;
+        loadCounterY++;
+        cout << endl;
+      }
+    }
+  }
+  else
+  {
+    cerr << "Can't load map file" << endl;
+  }
+}
+
+void drawMap(int map[100][100], int x, int &y);
 
 int main(int argc, char **argv)
 {
@@ -19,6 +54,7 @@ int main(int argc, char **argv)
   al_init_font_addon();
   al_init_ttf_addon();
   al_init_acodec_addon();
+  al_init_primitives_addon();
 
   const ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
   const ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
@@ -41,13 +77,14 @@ int main(int argc, char **argv)
       path = "../assets/img/mariobros_0" + to_string(i + 2) + ".gif";
     else
       path = "../assets/img/mariobros_" + to_string(i + 2) + ".gif";
-    cout << path << endl;
+    // cout << path << endl;
     frame[i] = al_load_bitmap(path.c_str());
   }
   // al_set_display_icon(display, ico);
   ALLEGRO_TIMER *timer = al_create_timer(1 / FPS);
   ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
   ALLEGRO_FONT *font = al_load_ttf_font("../assets/fnt/font.ttf", 120, 0);
+
   al_register_event_source(queue, al_get_keyboard_event_source());
   al_register_event_source(queue, al_get_mouse_event_source());
   al_register_event_source(queue, al_get_display_event_source(display));
@@ -67,9 +104,20 @@ int main(int argc, char **argv)
   bool active = false;
   bool flip = false;
   int pos = 0;
+
+  al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
+  al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
+  al_flip_display();
+  al_clear_to_color(blue);
+  int map[100][100];
+  loadMap("../assets/map/block", map);
+  al_rest(3);
+  int floor = 3;
   while (running)
   {
-    y = SCREEN_H - 32;
+    drawMap(map, x, floor);
+    cout << floor << "\n";
+    y = BLOCK_SIZE * floor - BLOCK_SIZE;
     active = false;
     ALLEGRO_EVENT event;
     al_wait_for_event(queue, &event);
@@ -106,7 +154,7 @@ int main(int argc, char **argv)
     {
       pos = 4;
       active = true;
-      y -= 20;
+      y -= BLOCK_SIZE + 1;
     }
     if (al_key_down(&keyState, ALLEGRO_KEY_B))
     {
@@ -118,8 +166,8 @@ int main(int argc, char **argv)
       pos = 1;
     if (event.type == ALLEGRO_EVENT_TIMER)
     {
-      al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
-      al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
+      // al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
+      // al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
       if (pos == 4)
         al_play_sample(jump, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
       else if (active)
@@ -147,12 +195,46 @@ int main(int argc, char **argv)
   al_destroy_font(font);
   al_destroy_display(display);
   al_uninstall_keyboard();
+  al_uninstall_mouse();
   al_destroy_sample(step);
   al_destroy_sample(jump);
   al_uninstall_audio();
   al_shutdown_font_addon();
   al_shutdown_image_addon();
   al_shutdown_ttf_addon();
-  al_uninstall_mouse();
+  al_shutdown_primitives_addon();
   return 0;
+}
+
+void drawMap(int map[100][100], int col, int &floor)
+{
+  cout << "disegno la mappa";
+  floor = -1;
+  col /= 32;
+  for (int i = 0; i < MAP_W; i++)
+  {
+    for (int j = offset_top; j < MAP_H; j++)
+    {
+      if (map[i][j] == 0)
+      {
+        al_draw_filled_rectangle(
+            i * BLOCK_SIZE,
+            j * BLOCK_SIZE,
+            i * BLOCK_SIZE + BLOCK_SIZE,
+            j * BLOCK_SIZE + BLOCK_SIZE,
+            al_map_rgb(0, 0, 231));
+      }
+      else
+      {
+        if (i == col && floor == -1)
+          floor = j;
+        al_draw_filled_rectangle(
+            i * BLOCK_SIZE,
+            j * BLOCK_SIZE,
+            i * BLOCK_SIZE + BLOCK_SIZE,
+            j * BLOCK_SIZE + BLOCK_SIZE,
+            al_map_rgb(255, 255, 255));
+      }
+    }
+  }
 }
