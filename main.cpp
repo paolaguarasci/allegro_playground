@@ -101,7 +101,7 @@ int main(int argc, char **argv)
   float velx, vely;
   velx, vely = 0;
   bool jumping = false;
-  float jumpSpeed = 15;
+  float jumpSpeed = 10;
   const float gravity = 1;
 
   float asse = 0;
@@ -141,12 +141,14 @@ int main(int argc, char **argv)
     {
       vely = 0;
     }
-    x = (x + velx > SCREEN_W ? 0 : velx + x);
+    x = (x + velx > SCREEN_W ? 0 : (x + velx < 0 ? SCREEN_W : x + velx));
     y += vely;
     jumping = (y + BLOCK_SIZE >= BLOCK_SIZE * floor);
     if (jumping)
       y = BLOCK_SIZE * floor - BLOCK_SIZE;
-    active = false;
+    // active = false;
+    if (!active && jumping)
+      pos = 1;
     //////////////////////////////////////////////////////////////
     // Keyboard and multiple ket press at sime time
     // Esco se chiudo la finestra con la (X) o con ESC
@@ -161,6 +163,8 @@ int main(int argc, char **argv)
       active = true;
       flip = false;
       direction = 1;
+      if (!jumping)
+        al_play_sample(step, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
     else if (al_key_down(&keyState, ALLEGRO_KEY_LEFT))
     {
@@ -169,6 +173,8 @@ int main(int argc, char **argv)
       active = true;
       flip = true;
       direction = -1;
+      if (!jumping)
+        al_play_sample(step, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
     else
     {
@@ -184,7 +190,7 @@ int main(int argc, char **argv)
     if (al_key_down(&keyState, ALLEGRO_KEY_SPACE) && jumping)
     {
       pos = 4;
-      active = true;
+      // active = false;
       // y -= BLOCK_SIZE + 1;
       vely = -jumpSpeed;
       jumping = false;
@@ -196,8 +202,6 @@ int main(int argc, char **argv)
       active = true;
     }
     //////////////////////////////////////////////////////////////
-    if (!active)
-      pos = 1;
 
     //////////////////////////////////////////////////////////////
     /////////////////////// TIMER ////////////////////////////////
@@ -206,8 +210,7 @@ int main(int argc, char **argv)
     {
       // al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
       // al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
-      if (active)
-        al_play_sample(step, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+
       // for (int i = 0; i < 10; i++)
       //   al_draw_bitmap(frame[i], x += 32, y += 32, 0);
       // al_draw_bitmap(pg, x, y, 0);
@@ -247,8 +250,9 @@ int main(int argc, char **argv)
 void drawMap(int map[100][100], int col, int &floor)
 {
   cout << "disegno la mappa";
-  floor = -1;
+  // floor = -1;
   col /= 32;
+  bool ground = false;
   for (int i = 0; i < MAP_W; i++)
   {
     for (int j = offset_top; j < MAP_H; j++)
@@ -260,18 +264,30 @@ void drawMap(int map[100][100], int col, int &floor)
             j * BLOCK_SIZE,
             i * BLOCK_SIZE + BLOCK_SIZE,
             j * BLOCK_SIZE + BLOCK_SIZE,
-            al_map_rgb(0, 0, 231));
+            al_map_rgb(102, 153, 255));
       }
-      else
+      else if (map[i][j] == 2)
       {
-        if (i == col && floor == -1)
-          floor = j;
         al_draw_filled_rectangle(
             i * BLOCK_SIZE,
             j * BLOCK_SIZE,
             i * BLOCK_SIZE + BLOCK_SIZE,
             j * BLOCK_SIZE + BLOCK_SIZE,
             al_map_rgb(255, 255, 255));
+      }
+      else if (map[i][j] == 1)
+      {
+        if (i == col && !ground)
+        {
+          floor = j;
+          ground = true;
+        }
+        al_draw_filled_rectangle(
+            i * BLOCK_SIZE,
+            j * BLOCK_SIZE,
+            i * BLOCK_SIZE + BLOCK_SIZE,
+            j * BLOCK_SIZE + BLOCK_SIZE,
+            al_map_rgb(153, 102, 51));
       }
     }
   }
