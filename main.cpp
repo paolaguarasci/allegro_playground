@@ -46,6 +46,9 @@ void drawMap(int map[100][100], int x, int &y);
 
 int main(int argc, char **argv)
 {
+  //////////////////////////////////////////////////////////////
+  ////////////////////// INIT //////////////////////////////////
+  //////////////////////////////////////////////////////////////
   al_init();
   al_install_audio();
   al_install_keyboard();
@@ -89,12 +92,18 @@ int main(int argc, char **argv)
   al_register_event_source(queue, al_get_mouse_event_source());
   al_register_event_source(queue, al_get_display_event_source(display));
   al_register_event_source(queue, al_get_timer_event_source(timer));
-  // al_register_event_source(queue, al_get_timer_event_source(leg));
+
   al_hide_mouse_cursor(display);
   bool draw = false;
   bool running = true;
-  float x = SCREEN_W / 2;
-  float y = SCREEN_H - 32;
+  float x = -1;
+  float y = 32;
+  float velx, vely;
+  velx, vely = 0;
+  bool jumping = false;
+  float jumpSpeed = 15;
+  const float gravity = 1;
+
   float asse = 0;
   int start_x = 96;
   int start_y = 0;
@@ -112,65 +121,92 @@ int main(int argc, char **argv)
   int map[100][100];
   loadMap("../assets/map/block", map);
   al_rest(3);
-  int floor = 3;
+  int floor = -1;
+
   while (running)
   {
-    drawMap(map, x, floor);
-    cout << floor << "\n";
-    y = BLOCK_SIZE * floor - BLOCK_SIZE;
-    active = false;
     ALLEGRO_EVENT event;
     al_wait_for_event(queue, &event);
-    // Keyboard and multiple ket press at sime time
     ALLEGRO_KEYBOARD_STATE keyState;
     al_get_keyboard_state(&keyState);
+
+    drawMap(map, x, floor);
+    cout << floor << "\n";
+    // y = BLOCK_SIZE * floor - BLOCK_SIZE;
+    if (!jumping)
+    {
+      vely += gravity;
+    }
+    else
+    {
+      vely = 0;
+    }
+    x = (x + velx > SCREEN_W ? 0 : velx + x);
+    y += vely;
+    jumping = (y + BLOCK_SIZE >= BLOCK_SIZE * floor);
+    if (jumping)
+      y = BLOCK_SIZE * floor - BLOCK_SIZE;
+    active = false;
+    //////////////////////////////////////////////////////////////
+    // Keyboard and multiple ket press at sime time
     // Esco se chiudo la finestra con la (X) o con ESC
     if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE || al_key_down(&keyState, ALLEGRO_KEY_ESCAPE))
-    {
       running = false;
-    }
+
     if (al_key_down(&keyState, ALLEGRO_KEY_RIGHT))
     {
-      x = (x + PASSO > SCREEN_W ? 0 : x + PASSO);
+      // x = (x + PASSO > SCREEN_W ? 0 : x + PASSO);
+      velx = PASSO;
       pos = (pos == 1 ? 2 : 1);
       active = true;
       flip = false;
       direction = 1;
     }
-    if (al_key_down(&keyState, ALLEGRO_KEY_LEFT))
+    else if (al_key_down(&keyState, ALLEGRO_KEY_LEFT))
     {
-      x = (x - PASSO + al_get_bitmap_width(pg) > 0 ? x - PASSO : SCREEN_W);
+      velx = -PASSO;
       pos = (pos == 1 ? 2 : 1);
       active = true;
       flip = true;
       direction = -1;
     }
+    else
+    {
+      velx = 0;
+      active = false;
+    }
+    //////////////////////////////////////////////////////////////
     if (al_key_down(&keyState, ALLEGRO_KEY_DOWN))
     {
       pos = 5;
       active = true;
     }
-    if (al_key_down(&keyState, ALLEGRO_KEY_SPACE))
+    if (al_key_down(&keyState, ALLEGRO_KEY_SPACE) && jumping)
     {
       pos = 4;
       active = true;
-      y -= BLOCK_SIZE + 1;
+      // y -= BLOCK_SIZE + 1;
+      vely = -jumpSpeed;
+      jumping = false;
+      al_play_sample(jump, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
     if (al_key_down(&keyState, ALLEGRO_KEY_B))
     {
-
       pos = 16;
       active = true;
     }
+    //////////////////////////////////////////////////////////////
     if (!active)
       pos = 1;
+
+    //////////////////////////////////////////////////////////////
+    /////////////////////// TIMER ////////////////////////////////
+    //////////////////////////////////////////////////////////////
     if (event.type == ALLEGRO_EVENT_TIMER)
     {
       // al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
       // al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
-      if (pos == 4)
-        al_play_sample(jump, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
-      else if (active)
+      if (active)
         al_play_sample(step, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
       // for (int i = 0; i < 10; i++)
       //   al_draw_bitmap(frame[i], x += 32, y += 32, 0);
@@ -182,11 +218,13 @@ int main(int argc, char **argv)
     }
   }
 
+  //////////////////////////////////////////////////////////////
+  ////////////////////// DESTROY ///////////////////////////////
+  //////////////////////////////////////////////////////////////
   for (int i = 0; i < 17; i++)
   {
     al_destroy_bitmap(frame[i]);
   }
-
   // al_stop_timer(timer);
   al_destroy_timer(timer);
   al_destroy_event_queue(queue);

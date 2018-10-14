@@ -7,7 +7,7 @@ const std::string TITLE_line01 = "Super Mario";
 const std::string TITLE_line02 = "Brok(en)";
 
 // PG //
-const int PASSO = 2;
+const int PASSO = 10;
 const int PASSO_RUN = 15;
 
 // MAP //
