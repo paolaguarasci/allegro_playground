@@ -4,17 +4,21 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 #include "variable.hpp"
 using namespace std;
 
 int main(int argc, char **argv)
 {
   al_init();
+  al_install_audio();
   al_install_keyboard();
   al_install_mouse();
   al_init_image_addon();
   al_init_font_addon();
   al_init_ttf_addon();
+  al_init_acodec_addon();
 
   const ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
   const ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
@@ -26,6 +30,9 @@ int main(int argc, char **argv)
   ALLEGRO_DISPLAY *display = al_create_display(SCREEN_W, SCREEN_H);
   // ALLEGRO_BITMAP *ico = al_load_bitmap("../assets/img/image64x64.png");
   ALLEGRO_BITMAP *pg = al_load_bitmap("../assets/img/image64x64.png");
+  al_reserve_samples(2);
+  ALLEGRO_SAMPLE *step = al_load_sample("../assets/snd/step.wav");
+  ALLEGRO_SAMPLE *jump = al_load_sample("../assets/snd/jump.wav");
   ALLEGRO_BITMAP **frame = new ALLEGRO_BITMAP *[18];
   for (int i = 0; i < 17; i++)
   {
@@ -103,6 +110,7 @@ int main(int argc, char **argv)
     }
     if (al_key_down(&keyState, ALLEGRO_KEY_B))
     {
+
       pos = 16;
       active = true;
     }
@@ -112,6 +120,10 @@ int main(int argc, char **argv)
     {
       al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
       al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
+      if (pos == 4)
+        al_play_sample(jump, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+      else if (active)
+        al_play_sample(step, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
       // for (int i = 0; i < 10; i++)
       //   al_draw_bitmap(frame[i], x += 32, y += 32, 0);
       // al_draw_bitmap(pg, x, y, 0);
@@ -135,9 +147,12 @@ int main(int argc, char **argv)
   al_destroy_font(font);
   al_destroy_display(display);
   al_uninstall_keyboard();
-  // al_shutdown_font_addon();
-  // al_shutdown_image_addon();
-  // al_shutdown_ttf_addon();
+  al_destroy_sample(step);
+  al_destroy_sample(jump);
+  al_uninstall_audio();
+  al_shutdown_font_addon();
+  al_shutdown_image_addon();
+  al_shutdown_ttf_addon();
   al_uninstall_mouse();
   return 0;
 }
