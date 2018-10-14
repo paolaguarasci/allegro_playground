@@ -2,12 +2,13 @@
 const int SCREEN_W = 800;
 const int SCREEN_H = 608;
 const float FPS = 60.00;
-const std::string TITLE = "Super Mario Brok(en)";
+const std::string TITLE_all = "Super Mario Brok(en)";
 const std::string TITLE_line01 = "Super Mario";
 const std::string TITLE_line02 = "Brok(en)";
+const std::string TITLE_line03 = "-> press space <-";
 
 // PG //
-const int PASSO = 10;
+const int PASSO = 5;
 const int PASSO_RUN = 15;
 
 // MAP //

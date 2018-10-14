@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <math.h>
+#include <algorithm>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
@@ -11,19 +13,27 @@
 #include "variable.hpp"
 using namespace std;
 int loadCounterX = 0, loadCounterY = 0, mapSizeX, mapSizeY;
-int map[100][100];
-void loadMap(const char *filename, int map[100][100])
+int map[1000][1000];
+void loadMap(const char *filename)
 {
   ifstream openfile(filename);
   if (openfile.is_open())
   {
-    openfile >> mapSizeX >> mapSizeY;
-    cout << mapSizeX << ", " << mapSizeY << endl;
+    // openfile >> mapSizeX >> mapSizeY;
+    string line;
+    getline(openfile, line);
+    line.erase(remove(line.begin(), line.end(), ' '), line.end());
+    cout << line << endl;
+    mapSizeX = line.length();
+    cout << "MapSizeX " << mapSizeX << ", "
+         << "MapSizeY " << mapSizeY << endl;
+    openfile.seekg(0, ios::beg);
+
     while (!openfile.eof())
     {
       // leggo dal file la posizione lcx e lcy
       openfile >> map[loadCounterX][loadCounterY];
-      cout << map[loadCounterX][loadCounterY] << " ";
+      // cout << map[loadCounterX][loadCounterY] << " ";
       loadCounterX++;
       // incremento solo la x,
       // quando arriva al bordo la porto a 0
@@ -32,9 +42,12 @@ void loadMap(const char *filename, int map[100][100])
       {
         loadCounterX = 0;
         loadCounterY++;
-        cout << endl;
+        // cout << endl;
       }
     }
+    mapSizeY = loadCounterY;
+    cout << "MapSizeX " << mapSizeX << ", "
+         << "MapSizeY " << mapSizeY << endl;
   }
   else
   {
@@ -42,10 +55,20 @@ void loadMap(const char *filename, int map[100][100])
   }
 }
 
-void drawMap(int map[100][100], int x, int &y);
+void drawMap(int x, int &y, float *cameraPosition);
+void cameraUpdate(float *cameraPosition, float x, float y, int width, int heigth)
+{
+  cameraPosition[0] = -(SCREEN_W / 2) + (x + width / 2);
+  cameraPosition[1] = -(SCREEN_H / 2) + (y + heigth / 2);
 
+  if (cameraPosition[0] < 0)
+    cameraPosition[0] = 0;
+  if (cameraPosition[1] < 0)
+    cameraPosition[1] = 0;
+}
 int main(int argc, char **argv)
 {
+  float cameraPosition[2] = {0, 0};
   //////////////////////////////////////////////////////////////
   ////////////////////// INIT //////////////////////////////////
   //////////////////////////////////////////////////////////////
@@ -62,10 +85,11 @@ int main(int argc, char **argv)
   const ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
   const ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
   const ALLEGRO_COLOR green = al_map_rgb(51, 222, 162);
-  const ALLEGRO_COLOR blue = al_map_rgb(76, 51, 222);
+  const ALLEGRO_COLOR sky = al_map_rgb(102, 153, 255);
   const ALLEGRO_COLOR red = al_map_rgb(222, 51, 111);
   const ALLEGRO_COLOR yellow = al_map_rgb(196, 222, 51);
-
+  al_set_new_display_flags(ALLEGRO_RESIZABLE);
+  // display = al_create_display(800, 600);
   ALLEGRO_DISPLAY *display = al_create_display(SCREEN_W, SCREEN_H);
   // ALLEGRO_BITMAP *ico = al_load_bitmap("../assets/img/image64x64.png");
   ALLEGRO_BITMAP *pg = al_load_bitmap("../assets/img/image64x64.png");
@@ -87,19 +111,21 @@ int main(int argc, char **argv)
   ALLEGRO_TIMER *timer = al_create_timer(1 / FPS);
   ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
   ALLEGRO_FONT *font = al_load_ttf_font("../assets/fnt/font.ttf", 120, 0);
-
+  ALLEGRO_FONT *fontSmall = al_load_ttf_font("../assets/fnt/font.ttf", 20, 0);
+  ALLEGRO_TRANSFORM camera;
   al_register_event_source(queue, al_get_keyboard_event_source());
   al_register_event_source(queue, al_get_mouse_event_source());
   al_register_event_source(queue, al_get_display_event_source(display));
   al_register_event_source(queue, al_get_timer_event_source(timer));
-
-  al_hide_mouse_cursor(display);
+  // al_set_new_display_flags(ALLEGRO_RESIZABLE);
+  al_set_window_title(display, TITLE_all.c_str());
+  // al_hide_mouse_cursor(display);
   bool draw = false;
   bool running = true;
-  float x = -1;
+  float x = SCREEN_W / 4;
   float y = 32;
   float velx, vely;
-  velx, vely = 0;
+  // velx, vely = 0;
   bool jumping = false;
   float jumpSpeed = 10;
   const float gravity = 1;
@@ -113,15 +139,20 @@ int main(int argc, char **argv)
   bool active = false;
   bool flip = false;
   int pos = 0;
-
+  bool once = true;
+  loadMap("../assets/map/block");
+  al_clear_to_color(sky);
   al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
   al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
+  // al_draw_text(fontSmall, white, SCREEN_W / 2, SCREEN_H / 2 + 150, ALLEGRO_ALIGN_CENTRE, TITLE_line03.c_str());
   al_flip_display();
-  al_clear_to_color(blue);
-  int map[100][100];
-  loadMap("../assets/map/block", map);
-  al_rest(3);
+  al_clear_to_color(sky);
+  al_rest(2);
   int floor = -1;
+  int marioX, marioY = 0;
+  // int scrollx = 0;
+  ALLEGRO_KEYBOARD_STATE keyState;
+  al_get_keyboard_state(&keyState);
 
   while (running)
   {
@@ -130,8 +161,8 @@ int main(int argc, char **argv)
     ALLEGRO_KEYBOARD_STATE keyState;
     al_get_keyboard_state(&keyState);
 
-    drawMap(map, x, floor);
-    cout << floor << "\n";
+    drawMap(x, floor, cameraPosition);
+    // cout << floor << "\n";
     // y = BLOCK_SIZE * floor - BLOCK_SIZE;
     if (!jumping)
     {
@@ -141,7 +172,9 @@ int main(int argc, char **argv)
     {
       vely = 0;
     }
-    x = (x + velx > SCREEN_W ? 0 : (x + velx < 0 ? SCREEN_W : x + velx));
+
+    // x = (x + velx > SCREEN_W ? 0 : (x + velx < 0 ? SCREEN_W : x + velx));
+    x += velx;
     y += vely;
     jumping = (y + BLOCK_SIZE >= BLOCK_SIZE * floor);
     if (jumping)
@@ -175,6 +208,8 @@ int main(int argc, char **argv)
       direction = -1;
       if (!jumping)
         al_play_sample(step, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+      // if (x + velx > SCREEN_W)
+      //   scrollx++;
     }
     else
     {
@@ -210,14 +245,17 @@ int main(int argc, char **argv)
     {
       // al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 4, ALLEGRO_ALIGN_CENTRE, TITLE_line01.c_str());
       // al_draw_text(font, white, SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTRE, TITLE_line02.c_str());
-
+      cameraUpdate(cameraPosition, x, y, 32, 32);
+      al_identity_transform(&camera);
+      al_translate_transform(&camera, -cameraPosition[0], 0);
+      al_use_transform(&camera);
       // for (int i = 0; i < 10; i++)
       //   al_draw_bitmap(frame[i], x += 32, y += 32, 0);
       // al_draw_bitmap(pg, x, y, 0);
       al_draw_bitmap(frame[pos], x, y, flip);
       // al_draw_bitmap_region(spritesheet, start_x + delta_x * pos, start_y, 16, 32, x, y, NULL);
       al_flip_display();
-      al_clear_to_color(blue);
+      al_clear_to_color(sky);
     }
   }
 
@@ -234,6 +272,7 @@ int main(int argc, char **argv)
   // al_destroy_bitmap(spritesheet);
   // al_destroy_bitmap(ico);
   al_destroy_font(font);
+  al_destroy_font(fontSmall);
   al_destroy_display(display);
   al_uninstall_keyboard();
   al_uninstall_mouse();
@@ -247,15 +286,18 @@ int main(int argc, char **argv)
   return 0;
 }
 
-void drawMap(int map[100][100], int col, int &floor)
+void drawMap(int col, int &floor, float *cameraPosition)
 {
-  cout << "disegno la mappa";
-  // floor = -1;
-  col /= 32;
+  col = static_cast<int>(ceil(col / BLOCK_SIZE));
+  int startx = cameraPosition[0] / BLOCK_SIZE;
+  int stopx = cameraPosition[0] / BLOCK_SIZE + (SCREEN_W / BLOCK_SIZE);
+  int starty = 0;
+  int stopy = SCREEN_W / BLOCK_SIZE;
+  // cout << "Colonna" << col << endl;
   bool ground = false;
-  for (int i = 0; i < MAP_W; i++)
+  for (int i = startx; i < stopx; i++)
   {
-    for (int j = offset_top; j < MAP_H; j++)
+    for (int j = starty; j < stopy; j++)
     {
       if (map[i][j] == 0)
       {

@@ -66,4 +66,10 @@ $ ./allegroPrimer
 
 *niente da distruggere....*
 ---
--
+
+
+
+TODO:
+- Sincro audio effect
+- Mappa scorrimento
+- Collisioni
