@@ -10,6 +10,7 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_native_dialog.h>
 #include "variable.hpp"
 using namespace std;
 int loadCounterX = 0, loadCounterY = 0, mapSizeX, mapSizeY;
@@ -182,6 +183,16 @@ int main(int argc, char **argv)
     // active = false;
     if (!active && jumping)
       pos = 1;
+    if (y + BLOCK_SIZE >= SCREEN_H)
+    {
+      // cout << "Game OVER!" << endl;
+      al_show_native_message_box(al_get_current_display(),
+                                 "Game Over!",
+                                 "",
+                                 "AHAHAHAH.. Sei scemo!",
+                                 NULL, ALLEGRO_MESSAGEBOX_WARN);
+      running = false;
+    }
     //////////////////////////////////////////////////////////////
     // Keyboard and multiple ket press at sime time
     // Esco se chiudo la finestra con la (X) o con ESC
@@ -297,6 +308,7 @@ void drawMap(int col, int &floor, float *cameraPosition)
   bool ground = false;
   for (int i = startx; i < stopx; i++)
   {
+
     for (int j = starty; j < stopy; j++)
     {
       if (map[i][j] == 0)
@@ -332,5 +344,7 @@ void drawMap(int col, int &floor, float *cameraPosition)
             al_map_rgb(153, 102, 51));
       }
     }
+    if (!ground)
+      floor = 30;
   }
 }
